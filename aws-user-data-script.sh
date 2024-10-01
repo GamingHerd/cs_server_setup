@@ -94,13 +94,24 @@ sudo -i -u steam bash <<EOF
   # Remove the downloaded MetaMod tar.gz file
   rm "$METAMOD_FILE_NAME"
 
-  # Edit the gameinfo.gi file to add MetaMod to the SearchPaths section
-  if grep -q "csgo/addons/metamod" "$GAMEINFO_FILE_PATH"; then
-    echo "MetaMod already added to SearchPaths."
+  METAMOD_GAMEINFO_ENTRY="                        Game    csgo/addons/metamod"
+
+  if grep -Fxq "$METAMOD_GAMEINFO_ENTRY" "$GAMEINFO_FILE_PATH"; then
+    echo "The entry '$METAMOD_GAMEINFO_ENTRY' already exists in ${GAMEINFO_FILE_PATH}. No changes were made."
   else
-    line_number=$(grep -n "csgo_lv" "$GAMEINFO_FILE_PATH" | cut -d: -f1)
-    sed -i "${line_number}a\\\t\t\tGame\tcsgo/addons/metamod" "$GAMEINFO_FILE_PATH"
-    echo "MetaMod added to SearchPaths."
+    awk -v new_entry="$METAMOD_GAMEINFO_ENTRY" '
+        BEGIN { found=0; }
+        // {
+            if (found) {
+                print new_entry;
+                found=0;
+            }
+            print;
+        }
+        /Game_LowViolence/ { found=1; }
+    ' "$GAMEINFO_FILE_PATH" > "$GAMEINFO_FILE_PATH.tmp" && mv "$GAMEINFO_FILE_PATH.tmp" "$GAMEINFO_FILE_PATH"
+
+    echo "The file ${GAMEINFO_FILE_PATH} has been modified successfully. '$METAMOD_GAMEINFO_ENTRY' has been added."
   fi
 
   # Download the latest MatchZy build
@@ -120,8 +131,8 @@ sudo -i -u steam bash <<EOF
 
   # Cange the knife round time to 69 seconds (nice)
   sed -i "s/^mp_roundtime .*/mp_roundtime 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
-  sed -i "s/^mp_roundtime .*/mp_roundtime_defuse 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
-  sed -i "s/^mp_roundtime .*/mp_roundtime_hostage 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
+  sed -i "s/^mp_roundtime_defuse .*/mp_roundtime_defuse 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
+  sed -i "s/^mp_roundtime_hostage .*/mp_roundtime_hostage 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
 
   # Only whitelist admin for now until a match would Start
   echo "$EAGLE_STEAM_ID" > "$MATCHZY_WHITELIST_FILE_PATH"
