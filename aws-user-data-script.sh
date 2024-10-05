@@ -19,8 +19,10 @@ MATCH_TEMP_SERVER_FILE_PATH="/tmp/matchzy-server.cfg"
 EAGLE_STEAM_ID="76561197972259038"
 GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 MATCHZY_VERSION="0.8.6"
-METAMOD_FILE_NAME="mmsource-2.0.0-git1313-linux.tar.gz"
+METAMOD_FILE_NAME="mmsource-2.0.0-git1314-linux.tar.gz"
 METAMOD_URL_PATH_VERSION="2.0"
+COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-272-linux-e36d2e0.zip"
+COUNTER_STRIKE_SHARP_FILE_URL="v272/$COUNTER_STRIKE_SHARP_FILE_NAME"
 
 # Accept the SteamCMD license agreement automatically
 echo steam steam/question select "I AGREE" | sudo debconf-set-selections && echo steam steam/license note '' | sudo debconf-set-selections
@@ -114,14 +116,22 @@ sudo -i -u steam bash <<EOF
     echo "The file ${GAMEINFO_FILE_PATH} has been modified successfully. '$METAMOD_GAMEINFO_ENTRY' has been added."
   fi
 
+  # Download the latest CounterStrikeSharp build
+  wget "https://github.com/roflmuffin/CounterStrikeSharp/releases/download/$COUNTER_STRIKE_SHARP_FILE_URL"
+
+  # Extract CounterStrikeSharp to the CS2 directory
+  unzip -o "$COUNTER_STRIKE_SHARP_FILE_NAME" -d "$CSGO_GAME_DIR"
+
+  rm "$COUNTER_STRIKE_SHARP_FILE_NAME"
+
   # Download the latest MatchZy build
-  wget "https://github.com/shobhit-pathak/MatchZy/releases/download/$MATCHZY_VERSION/MatchZy-$MATCHZY_VERSION-with-cssharp-linux.zip"
+  wget "https://github.com/shobhit-pathak/MatchZy/releases/download/$MATCHZY_VERSION/MatchZy-$MATCHZY_VERSION.zip"
 
   # Extract MatchZy to the CS2 directory
-  unzip -o "MatchZy-$MATCHZY_VERSION-with-cssharp-linux.zip" -d "$CSGO_GAME_DIR"
+  unzip -o "MatchZy-$MATCHZY_VERSION.zip" -d "$CSGO_GAME_DIR"
 
   # Remove the downloaded MatchZy .zip file
-  rm "MatchZy-$MATCHZY_VERSION-with-cssharp-linux.zip"
+  rm "MatchZy-$MATCHZY_VERSION.zip"
 
   # Symlink the steamclient.so to expected path
   ln -sf /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so "$SDK64_DIR"
