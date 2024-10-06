@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export AWS_REGION="us-east-1"
+AWS_REGION="us-east-1"
 
 # Kill existing CS2 process
 sudo pkill -f '/home/steam/cs2/game/bin/linuxsteamrt64/cs2'

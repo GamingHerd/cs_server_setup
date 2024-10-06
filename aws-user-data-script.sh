@@ -2,14 +2,18 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
-USER="steam"
+STEAM_USER="steam"
 AWS_REGION="us-east-1"
 CS2_DIR="/home/steam/cs2"
 CSGO_GAME_DIR="$CS2_DIR/game/csgo"
 SDK64_DIR="/home/steam/.steam/sdk64/"
 GITHUB_MATCHZY_SERVER_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy-config.cfg"
-SERVER_UPDATE_SCRIPT_FILENAME="cs2-server-update-script.sh"
-GITHUB_CS2_SERVER_UPDATE_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$SERVER_UPDATE_SCRIPT_FILENAME"
+STEAMCMD_UPDATE_SCRIPT_FILENAME="cs2-steamcmd-update-script.sh"
+GITHUB_CS2_STEAMCMD_UPDATE_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$STEAMCMD_UPDATE_SCRIPT_FILENAME"
+FULL_PACKAGE_UPDATE_SCRIPT_FILENAME="cs2-full-package-update-script.sh"
+GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
+UPDATE_SHELL_FILES_FILENAME="cs2-update-shell-files-script.sh"
+GITHUB_UPDATE_SHELL_FILES_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$UPDATE_SHELL_FILES_FILENAME"
 MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
 MATCHZY_ADMINS_FILE_PATH="$MATCHZY_DIR/admins.json"
 MATCHZY_WHITELIST_FILE_PATH="$MATCHZY_DIR/whitelist.cfg"
@@ -21,8 +25,8 @@ GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 MATCHZY_VERSION="0.8.6"
 METAMOD_FILE_NAME="mmsource-2.0.0-git1314-linux.tar.gz"
 METAMOD_URL_PATH_VERSION="2.0"
-COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-272-linux-e36d2e0.zip"
-COUNTER_STRIKE_SHARP_FILE_URL="v272/$COUNTER_STRIKE_SHARP_FILE_NAME"
+COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-276-linux-42dd270.zip"
+COUNTER_STRIKE_SHARP_FILE_URL="v276/$COUNTER_STRIKE_SHARP_FILE_NAME"
 
 # Accept the SteamCMD license agreement automatically
 echo steam steam/question select "I AGREE" | sudo debconf-set-selections && echo steam steam/license note '' | sudo debconf-set-selections
@@ -45,13 +49,13 @@ RCON_PASSWORD_JSON=$(aws secretsmanager get-secret-value --secret-id 'rcon-passw
 RCON_PASSWORD=$(echo "$RCON_PASSWORD_JSON" | jq -r '."rcon-password"')
 
 # Check if the user already exists
-if id "$USER" &>/dev/null; then
-  echo "User $USER already exists."
+if id "$STEAM_USER" &>/dev/null; then
+  echo "User $STEAM_USER already exists."
 else
   # Create a user account named steam to run SteamCMD safely, isolating it from the rest of the operating system.
   # As the root user, create the steam user:
-  sudo useradd -m "$USER"
-  echo "User $USER created."
+  sudo useradd -m "$STEAM_USER"
+  echo "User $STEAM_USER created."
   echo "steam:$STEAM_USER_PW" | sudo chpasswd
   # Add the 'steam' user to the 'sudo' group to grant sudo privileges
   sudo usermod -aG sudo steam
@@ -82,8 +86,14 @@ sudo -i -u steam bash <<EOF
 
   cd /home/steam
 
-  wget -O "$SERVER_UPDATE_SCRIPT_FILENAME" "$GITHUB_CS2_SERVER_UPDATE_URL"
-  chmod +x "$SERVER_UPDATE_SCRIPT_FILENAME"
+  wget -O "$STEAMCMD_UPDATE_SCRIPT_FILENAME" "$GITHUB_CS2_STEAMCMD_UPDATE_URL"
+  chmod +x "$STEAMCMD_UPDATE_SCRIPT_FILENAME"
+
+  wget -O "$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME" "$GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL"
+  chmod +x "$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
+
+  wget -O "$UPDATE_SHELL_FILES_FILENAME" "$GITHUB_UPDATE_SHELL_FILES_URL"
+  chmod +x "$UPDATE_SHELL_FILES_FILENAME"
 
   cd "$CS2_DIR"
 
@@ -151,7 +161,8 @@ sudo -i -u steam bash <<EOF
   wget -O "$MATCH_TEMP_SERVER_FILE_PATH" "$GITHUB_MATCHZY_SERVER_CONFIG_URL"
   mv "$MATCH_TEMP_SERVER_FILE_PATH" "$MATCHZY_CONFIG_FILE_PATH"
 
-  echo "rcon_password $RCON_PASSWORD" >> "$CSGO_GAME_DIR/cfg/server.cfg"
+  # Overwrite the rcon password in the server.cfg file
+  echo "rcon_password $RCON_PASSWORD" > "$CSGO_GAME_DIR/cfg/server.cfg"
   echo "tv_enable 1" >> "$CSGO_GAME_DIR/cfg/server.cfg"
   echo "tv_advertise_watchable 1" >> "$CSGO_GAME_DIR/cfg/server.cfg"
 
