@@ -14,6 +14,8 @@ FULL_PACKAGE_UPDATE_SCRIPT_FILENAME="cs2-full-package-update-script.sh"
 GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
 UPDATE_SHELL_FILES_FILENAME="cs2-update-shell-files-script.sh"
 GITHUB_UPDATE_SHELL_FILES_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$UPDATE_SHELL_FILES_FILENAME"
+ENSURE_RUNNING_SCRIPT_FILENAME="cs2-ensure-running-script.sh"
+GITHUB_ENSURE_RUNNING_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$ENSURE_RUNNING_SCRIPT_FILENAME"
 MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
 MATCHZY_ADMINS_FILE_PATH="$MATCHZY_DIR/admins.json"
 MATCHZY_WHITELIST_FILE_PATH="$MATCHZY_DIR/whitelist.cfg"
@@ -81,6 +83,8 @@ sudo -i -u steam bash <<EOF
     echo "Directory $SDK64_DIR already exists."
   fi
 
+  ln -s /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so ./steamservice.so
+
   # Run SteamCMD
   /usr/games/steamcmd +force_install_dir /home/steam/cs2 +login anonymous +app_update 730 validate +quit
 
@@ -94,6 +98,9 @@ sudo -i -u steam bash <<EOF
 
   wget -O "$UPDATE_SHELL_FILES_FILENAME" "$GITHUB_UPDATE_SHELL_FILES_URL"
   chmod +x "$UPDATE_SHELL_FILES_FILENAME"
+
+  wget -O "$ENSURE_RUNNING_SCRIPT_FILENAME" "$GITHUB_ENSURE_RUNNING_SCRIPT_URL"
+  chmod +x "$ENSURE_RUNNING_SCRIPT_FILENAME"
 
   cd "$CS2_DIR"
 
