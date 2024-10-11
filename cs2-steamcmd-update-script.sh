@@ -5,6 +5,8 @@ AWS_REGION="us-east-1"
 # Kill existing CS2 process
 sudo pkill -f '/home/steam/cs2/game/bin/linuxsteamrt64/cs2'
 
+sudo apt update && sudo apt upgrade -y && sudo apt full-upgrade -y && sudo apt autoremove -y && sudo apt clean
+
 # Run SteamCMD to update the game
 /usr/games/steamcmd +force_install_dir /home/steam/cs2 +login anonymous +app_update 730 +quit
 
