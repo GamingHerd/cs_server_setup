@@ -99,7 +99,7 @@ echo "tv_enable 1" >>"$CSGO_GAME_DIR/cfg/server.cfg"
 echo "tv_advertise_watchable 1" >>"$CSGO_GAME_DIR/cfg/server.cfg"
 
 # Start the CS2 server
-nohup /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -console -usercon -nobots +map de_dust2 +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN" -maxplayers 11 >/dev/null 2>&1 &
+nohup /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -console -usercon -nobots +map de_inferno +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN" -maxplayers 11 >/dev/null 2>&1 &
 
 disown
 

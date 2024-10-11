@@ -83,8 +83,6 @@ sudo -i -u steam bash <<EOF
     echo "Directory $SDK64_DIR already exists."
   fi
 
-  ln -s /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so ./steamservice.so
-
   # Run SteamCMD
   /usr/games/steamcmd +force_install_dir /home/steam/cs2 +login anonymous +app_update 730 validate +quit
 
@@ -108,7 +106,7 @@ sudo -i -u steam bash <<EOF
   wget "https://mms.alliedmods.net/mmsdrop/$METAMOD_URL_PATH_VERSION/$METAMOD_FILE_NAME"
 
   # Extract MetaMod to the CS2 directory
-  tar -xzvf "$METAMOD_FILE_NAME" -C "$CSGO_GAME_DIR" 
+  tar -xzvf "$METAMOD_FILE_NAME" -C "$CSGO_GAME_DIR"
 
   # Remove the downloaded MetaMod tar.gz file
   rm "$METAMOD_FILE_NAME"
@@ -174,5 +172,5 @@ sudo -i -u steam bash <<EOF
   echo "tv_advertise_watchable 1" >> "$CSGO_GAME_DIR/cfg/server.cfg"
 
   # Start the CS2 server
-  /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -console -usercon -nobots +map de_dust2 +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN" -maxplayers 11
+  /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -console -usercon -nobots +map de_inferno +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN" -maxplayers 11
 EOF
