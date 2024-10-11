@@ -25,8 +25,8 @@ GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 MATCHZY_VERSION="0.8.6"
 METAMOD_FILE_NAME="mmsource-2.0.0-git1314-linux.tar.gz"
 METAMOD_URL_PATH_VERSION="2.0"
-COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-276-linux-42dd270.zip"
-COUNTER_STRIKE_SHARP_FILE_URL="v276/$COUNTER_STRIKE_SHARP_FILE_NAME"
+COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-277-linux-cdb7a6e.zip"
+COUNTER_STRIKE_SHARP_FILE_URL="v277/$COUNTER_STRIKE_SHARP_FILE_NAME"
 
 # Accept the SteamCMD license agreement automatically
 echo steam steam/question select "I AGREE" | sudo debconf-set-selections && echo steam steam/license note '' | sudo debconf-set-selections

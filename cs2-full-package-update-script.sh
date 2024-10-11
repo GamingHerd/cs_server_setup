@@ -15,8 +15,8 @@ GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 MATCHZY_VERSION="0.8.6"
 METAMOD_FILE_NAME="mmsource-2.0.0-git1314-linux.tar.gz"
 METAMOD_URL_PATH_VERSION="2.0"
-COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-276-linux-42dd270.zip"
-COUNTER_STRIKE_SHARP_FILE_URL="v276/$COUNTER_STRIKE_SHARP_FILE_NAME"
+COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-277-linux-cdb7a6e.zip"
+COUNTER_STRIKE_SHARP_FILE_URL="v277/$COUNTER_STRIKE_SHARP_FILE_NAME"
 
 STEAM_GAME_SERVER_TOKEN_JSON=$(aws secretsmanager get-secret-value --secret-id 'steam-game-server-token' --region $AWS_REGION --query 'SecretString' --output text)
 STEAM_GAME_SERVER_TOKEN=$(echo "$STEAM_GAME_SERVER_TOKEN_JSON" | jq -r '."steam-game-server-token"')
