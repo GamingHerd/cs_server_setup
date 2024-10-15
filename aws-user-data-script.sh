@@ -172,5 +172,5 @@ sudo -i -u steam bash <<EOF
   echo "tv_advertise_watchable 1" >> "$CSGO_GAME_DIR/cfg/server.cfg"
 
   # Start the CS2 server
-  /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -console -usercon -nobots +map de_inferno +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN" -maxplayers 11
+  /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -usercon +map de_inferno +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN"
 EOF
