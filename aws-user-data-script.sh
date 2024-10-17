@@ -1,176 +1,148 @@
 #!/bin/bash
 
-export DEBIAN_FRONTEND=noninteractive
-
-STEAM_USER="steam"
 AWS_REGION="us-east-1"
-CS2_DIR="/home/steam/cs2"
-CSGO_GAME_DIR="$CS2_DIR/game/csgo"
-SDK64_DIR="/home/steam/.steam/sdk64/"
-GITHUB_MATCHZY_SERVER_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy-config.cfg"
-STEAMCMD_UPDATE_SCRIPT_FILENAME="cs2-steamcmd-update-script.sh"
-GITHUB_CS2_STEAMCMD_UPDATE_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$STEAMCMD_UPDATE_SCRIPT_FILENAME"
-FULL_PACKAGE_UPDATE_SCRIPT_FILENAME="cs2-full-package-update-script.sh"
-GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
-UPDATE_SHELL_FILES_FILENAME="cs2-update-shell-files-script.sh"
-GITHUB_UPDATE_SHELL_FILES_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$UPDATE_SHELL_FILES_FILENAME"
-ENSURE_RUNNING_SCRIPT_FILENAME="cs2-ensure-running-script.sh"
-GITHUB_ENSURE_RUNNING_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$ENSURE_RUNNING_SCRIPT_FILENAME"
-MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
-MATCHZY_ADMINS_FILE_PATH="$MATCHZY_DIR/admins.json"
-MATCHZY_WHITELIST_FILE_PATH="$MATCHZY_DIR/whitelist.cfg"
-MATCHZY_CONFIG_FILE_PATH="$MATCHZY_DIR/config.cfg"
-MATCHZY_KNIFE_CONFIG_FILE_PATH="$MATCHZY_DIR/knife.cfg"
-MATCH_TEMP_SERVER_FILE_PATH="/tmp/matchzy-server.cfg"
-EAGLE_STEAM_ID="76561197972259038"
-GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
-MATCHZY_VERSION="0.8.6"
-METAMOD_FILE_NAME="mmsource-2.0.0-git1314-linux.tar.gz"
-METAMOD_URL_PATH_VERSION="2.0"
-COUNTER_STRIKE_SHARP_FILE_NAME="counterstrikesharp-with-runtime-build-279-linux-ad7f7bd.zip"
-COUNTER_STRIKE_SHARP_FILE_URL="v279/$COUNTER_STRIKE_SHARP_FILE_NAME"
-
-# Accept the SteamCMD license agreement automatically
-echo steam steam/question select "I AGREE" | sudo debconf-set-selections && echo steam steam/license note '' | sudo debconf-set-selections
-
-sudo add-apt-repository -y multiverse
-sudo dpkg --add-architecture i386
-sudo apt-get update
-sudo apt update
-sudo apt-get install -y unzip
-sudo apt-get install -y jq
-sudo apt install -y lib32z1 lib32gcc-s1 lib32stdc++6 steamcmd
-sudo snap install aws-cli --classic
-sudo snap start amazon-ssm-agent
-
+STEAM_USER="cs2server"
 STEAM_USER_PW_JSON=$(aws secretsmanager get-secret-value --secret-id 'ec2-steam-user-pw' --region $AWS_REGION --query 'SecretString' --output text)
 STEAM_USER_PW=$(echo "$STEAM_USER_PW_JSON" | jq -r '."ec2-user-steam-pw"')
-STEAM_GAME_SERVER_TOKEN_JSON=$(aws secretsmanager get-secret-value --secret-id 'steam-game-server-token' --region $AWS_REGION --query 'SecretString' --output text)
-STEAM_GAME_SERVER_TOKEN=$(echo "$STEAM_GAME_SERVER_TOKEN_JSON" | jq -r '."steam-game-server-token"')
-RCON_PASSWORD_JSON=$(aws secretsmanager get-secret-value --secret-id 'rcon-password' --region $AWS_REGION --query 'SecretString' --output text)
-RCON_PASSWORD=$(echo "$RCON_PASSWORD_JSON" | jq -r '."rcon-password"')
 
 # Check if the user already exists
 if id "$STEAM_USER" &>/dev/null; then
   echo "User $STEAM_USER already exists."
 else
-  # Create a user account named steam to run SteamCMD safely, isolating it from the rest of the operating system.
-  # As the root user, create the steam user:
   sudo useradd -m "$STEAM_USER"
   echo "User $STEAM_USER created."
-  echo "steam:$STEAM_USER_PW" | sudo chpasswd
-  # Add the 'steam' user to the 'sudo' group to grant sudo privileges
-  sudo usermod -aG sudo steam
-  # Configure 'steam' to use sudo without a password
-  echo "steam ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/steam
+  echo "$STEAM_USER:$STEAM_USER_PW" | sudo chpasswd
+  sudo usermod -aG sudo "$STEAM_USER"
+  echo "$STEAM_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$STEAM_USER
 fi
 
-sudo -i -u steam bash <<EOF
-  # Check if the cs2 directory exists
-  if [ ! -d "$CS2_DIR" ]; then
-    # Directory does not exist, so create it
-    mkdir -p "$CS2_DIR"
-    echo "Directory $CS2_DIR created."
-  else
-    echo "Directory $CS2_DIR already exists."
-  fi
+sudo -u $STEAM_USER -s
 
-  if [ ! -d "$SDK64_DIR" ]; then
-    # Directory does not exist, so create it
-    mkdir -p "$SDK64_DIR"
-    echo "Directory $SDK64_DIR created."
-  else
-    echo "Directory $SDK64_DIR already exists."
-  fi
+STEAM_USER="cs2server"
 
-  # Run SteamCMD
-  /usr/games/steamcmd +force_install_dir /home/steam/cs2 +login anonymous +app_update 730 validate +quit
+cd /home/$STEAM_USER
 
-  cd /home/steam
+AWS_REGION="us-east-1"
+CS2_DIR="/home/cs2server/serverfiles"
+CSGO_GAME_DIR="$CS2_DIR/game/csgo"
+CS2_SERVER_CFG="$CSGO_GAME_DIR/cfg/cs2server.cfg"
+LINUXGSM_COMMON_CFG="/home/cs2server/lgsm/config-lgsm/cs2server/common.cfg"
+GITHUB_MATCHZY_SERVER_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy-config.cfg"
+MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
+MATCHZY_ADMINS_FILE_PATH="$MATCHZY_DIR/admins.json"
+MATCHZY_CONFIG_FILE_PATH="$MATCHZY_DIR/config.cfg"
+MATCHZY_KNIFE_CONFIG_FILE_PATH="$MATCHZY_DIR/knife.cfg"
+MATCH_TEMP_SERVER_FILE_PATH="/tmp/matchzy-server.cfg"
+MATCHZY_VERSION="0.8.6"
+MATCHZY_URL="https://github.com/shobhit-pathak/MatchZy/releases/download/$MATCHZY_VERSION/MatchZy-$MATCHZY_VERSION.zip"
+EAGLE_STEAM_ID="76561197972259038"
+GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
+METAMOD_URL="https://mms.alliedmods.net/mmsdrop/2.0/mmsource-2.0.0-git1314-linux.tar.gz"
+COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v279/counterstrikesharp-with-runtime-build-279-linux-ad7f7bd.zip"
 
-  wget -O "$STEAMCMD_UPDATE_SCRIPT_FILENAME" "$GITHUB_CS2_STEAMCMD_UPDATE_URL"
-  chmod +x "$STEAMCMD_UPDATE_SCRIPT_FILENAME"
+sudo dpkg --add-architecture i386
+sudo apt update
+yes | sudo apt install binutils bsdmainutils bzip2 libsdl2-2.0-0:i386 pigz steamcmd unzip jq
 
-  wget -O "$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME" "$GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL"
-  chmod +x "$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
+curl -Lo linuxgsm.sh https://linuxgsm.sh && chmod +x linuxgsm.sh && bash linuxgsm.sh cs2server
+yes | ./cs2server install
 
-  wget -O "$UPDATE_SHELL_FILES_FILENAME" "$GITHUB_UPDATE_SHELL_FILES_URL"
-  chmod +x "$UPDATE_SHELL_FILES_FILENAME"
+# Download the latest MetaMod build
+wget -q -O /tmp/metamod.tar.gz "$METAMOD_URL"
 
-  wget -O "$ENSURE_RUNNING_SCRIPT_FILENAME" "$GITHUB_ENSURE_RUNNING_SCRIPT_URL"
-  chmod +x "$ENSURE_RUNNING_SCRIPT_FILENAME"
+# Extract MetaMod to the csgo directory
+tar -xzf /tmp/metamod.tar.gz -C "$CSGO_GAME_DIR"
 
-  cd "$CS2_DIR"
+# Remove the downloaded MetaMod tar.gz file
+rm -f /tmp/metamod.tar.gz
 
-  # Download the latest MetaMod build
-  wget "https://mms.alliedmods.net/mmsdrop/$METAMOD_URL_PATH_VERSION/$METAMOD_FILE_NAME"
+METAMOD_GAMEINFO_ENTRY="                        Game    csgo/addons/metamod"
 
-  # Extract MetaMod to the CS2 directory
-  tar -xzvf "$METAMOD_FILE_NAME" -C "$CSGO_GAME_DIR"
+if grep -Fxq "$METAMOD_GAMEINFO_ENTRY" "$GAMEINFO_FILE_PATH"; then
+  echo "The entry '$METAMOD_GAMEINFO_ENTRY' already exists in ${GAMEINFO_FILE_PATH}. No changes were made."
+else
+  awk -v new_entry="$METAMOD_GAMEINFO_ENTRY" '
+      BEGIN { found=0; }
+      // {
+          if (found) {
+              print new_entry;
+              found=0;
+          }
+          print;
+      }
+      /Game_LowViolence/ { found=1; }
+  ' "$GAMEINFO_FILE_PATH" >"$GAMEINFO_FILE_PATH.tmp" && mv "$GAMEINFO_FILE_PATH.tmp" "$GAMEINFO_FILE_PATH"
 
-  # Remove the downloaded MetaMod tar.gz file
-  rm "$METAMOD_FILE_NAME"
+  echo "The file ${GAMEINFO_FILE_PATH} has been modified successfully. '$METAMOD_GAMEINFO_ENTRY' has been added."
+fi
 
-  METAMOD_GAMEINFO_ENTRY="                        Game    csgo/addons/metamod"
+# Download the latest CounterStrikeSharp build
+wget -q -O /tmp/cssharp.zip "$COUNTER_STRIKE_SHARP_URL"
 
-  if grep -Fxq "$METAMOD_GAMEINFO_ENTRY" "$GAMEINFO_FILE_PATH"; then
-    echo "The entry '$METAMOD_GAMEINFO_ENTRY' already exists in ${GAMEINFO_FILE_PATH}. No changes were made."
-  else
-    awk -v new_entry="$METAMOD_GAMEINFO_ENTRY" '
-        BEGIN { found=0; }
-        // {
-            if (found) {
-                print new_entry;
-                found=0;
-            }
-            print;
-        }
-        /Game_LowViolence/ { found=1; }
-    ' "$GAMEINFO_FILE_PATH" > "$GAMEINFO_FILE_PATH.tmp" && mv "$GAMEINFO_FILE_PATH.tmp" "$GAMEINFO_FILE_PATH"
+# Extract CounterStrikeSharp to the CS2 directory
+unzip -qo /tmp/cssharp.zip -d "$CSGO_GAME_DIR"
 
-    echo "The file ${GAMEINFO_FILE_PATH} has been modified successfully. '$METAMOD_GAMEINFO_ENTRY' has been added."
-  fi
+rm -f /tmp/cssharp.zip
 
-  # Download the latest CounterStrikeSharp build
-  wget "https://github.com/roflmuffin/CounterStrikeSharp/releases/download/$COUNTER_STRIKE_SHARP_FILE_URL"
+# Download the latest MatchZy build
+wget -q -O /tmp/matchzy.zip "$MATCHZY_URL"
 
-  # Extract CounterStrikeSharp to the CS2 directory
-  unzip -o "$COUNTER_STRIKE_SHARP_FILE_NAME" -d "$CSGO_GAME_DIR"
+# Extract MatchZy to the CS2 directory
+unzip -qo /tmp/matchzy.zip -d "$CSGO_GAME_DIR"
 
-  rm "$COUNTER_STRIKE_SHARP_FILE_NAME"
+# Remove the downloaded MatchZy .zip file
+rm -f /tmp/matchzy.zip
 
-  # Download the latest MatchZy build
-  wget "https://github.com/shobhit-pathak/MatchZy/releases/download/$MATCHZY_VERSION/MatchZy-$MATCHZY_VERSION.zip"
+# Replace MatchZy admins entry with proper admin
+sed -i "s/\"76561198154367261\": \".*\"/\"$EAGLE_STEAM_ID\": \"\"/" "$MATCHZY_ADMINS_FILE_PATH"
 
-  # Extract MatchZy to the CS2 directory
-  unzip -o "MatchZy-$MATCHZY_VERSION.zip" -d "$CSGO_GAME_DIR"
+# Cange the knife round time to 69 seconds (nice)
+sed -i "s/^mp_roundtime .*/mp_roundtime 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
+sed -i "s/^mp_roundtime_defuse .*/mp_roundtime_defuse 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
+sed -i "s/^mp_roundtime_hostage .*/mp_roundtime_hostage 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
 
-  # Remove the downloaded MatchZy .zip file
-  rm "MatchZy-$MATCHZY_VERSION.zip"
+# Replace MatchZy server config with custom config from GamingHerd GitHub
+wget -q -O "$MATCH_TEMP_SERVER_FILE_PATH" "$GITHUB_MATCHZY_SERVER_CONFIG_URL"
+mv "$MATCH_TEMP_SERVER_FILE_PATH" "$MATCHZY_CONFIG_FILE_PATH"
 
-  # Symlink the steamclient.so to expected path
-  ln -sf /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so "$SDK64_DIR"
+# I need to refactor this because you must have a unique GST per server
+STEAM_GAME_SERVER_TOKEN_JSON=$(aws secretsmanager get-secret-value --secret-id 'steam-game-server-token' --region $AWS_REGION --query 'SecretString' --output text)
+STEAM_GAME_SERVER_TOKEN=$(echo "$STEAM_GAME_SERVER_TOKEN_JSON" | jq -r '."steam-game-server-token"')
+RCON_PASSWORD_JSON=$(aws secretsmanager get-secret-value --secret-id 'rcon-password' --region $AWS_REGION --query 'SecretString' --output text)
+RCON_PASSWORD=$(echo "$RCON_PASSWORD_JSON" | jq -r '."rcon-password"')
 
-  # Replace MatchZy admins entry with proper admin
-  sed -i "s/\"76561198154367261\": \".*\"/\"$EAGLE_STEAM_ID\": \"\"/" "$MATCHZY_ADMINS_FILE_PATH"
+# Replace existing configs
+sed -i "s/^sv_setsteamaccount.*/sv_setsteamaccount \"$STEAM_GAME_SERVER_TOKEN\"/" "$CS2_SERVER_CFG"
+sed -i "s/^map\b.*/map \"de_inferno\"/" "$CS2_SERVER_CFG"
+sed -i "s/^game_alias.*/game_alias \"competitive\"/" "$CS2_SERVER_CFG"
 
-  # Cange the knife round time to 69 seconds (nice)
-  sed -i "s/^mp_roundtime .*/mp_roundtime 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
-  sed -i "s/^mp_roundtime_defuse .*/mp_roundtime_defuse 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
-  sed -i "s/^mp_roundtime_hostage .*/mp_roundtime_hostage 1.15/" "$MATCHZY_KNIFE_CONFIG_FILE_PATH"
+# New configs
+echo "" | sudo tee -a "$CS2_SERVER_CFG"
+echo "rcon_password $RCON_PASSWORD" | tee -a "$CS2_SERVER_CFG"
+echo "tv_enable 1" | tee -a "$CS2_SERVER_CFG"
+echo "tv_advertise_watchable 1" | tee -a "$CS2_SERVER_CFG"
+echo "tv_delay 30" | tee -a "$CS2_SERVER_CFG"
+echo "tv_name \"GamingHerdVision\"" | tee -a "$CS2_SERVER_CFG"
+echo "mp_friendlyfire 0" | tee -a "$CS2_SERVER_CFG"
+echo "mp_round_restart_delay 8" | tee -a "$CS2_SERVER_CFG"
 
-  # Only whitelist admin for now until a match would Start
-  echo "$EAGLE_STEAM_ID" > "$MATCHZY_WHITELIST_FILE_PATH"
+CRON_JOBS="*/5 * * * * /home/cs2server/cs2server monitor > /dev/null 2>&1
+*/30 * * * * /home/cs2server/cs2server update > /dev/null 2>&1
+0 0 * * 0 /home/cs2server/cs2server update-lgsm > /dev/null 2>&1"
 
-  # Replace MatchZy server config with custom config from GamingHerd GitHub
-  wget -O "$MATCH_TEMP_SERVER_FILE_PATH" "$GITHUB_MATCHZY_SERVER_CONFIG_URL"
-  mv "$MATCH_TEMP_SERVER_FILE_PATH" "$MATCHZY_CONFIG_FILE_PATH"
+# Add the cron jobs to the crontab for the cs2server user
+(
+  crontab -l -u $STEAM_USER 2>/dev/null
+  echo "$CRON_JOBS"
+) | crontab -u $STEAM_USER -
 
-  # Overwrite the rcon password in the server.cfg file
-  echo "rcon_password $RCON_PASSWORD" > "$CSGO_GAME_DIR/cfg/server.cfg"
-  echo "tv_enable 1" >> "$CSGO_GAME_DIR/cfg/server.cfg"
-  echo "tv_advertise_watchable 1" >> "$CSGO_GAME_DIR/cfg/server.cfg"
+DISCORD_WEBHOOK_JSON=$(aws secretsmanager get-secret-value --secret-id 'discord-webhook' --region $AWS_REGION --query 'SecretString' --output text)
+DISCORD_WEBHOOK=$(echo "$DISCORD_WEBHOOK_JSON" | jq -r '."discord-webhook"')
 
-  # Start the CS2 server
-  /home/steam/cs2/game/bin/linuxsteamrt64/cs2 -dedicated -usercon +map de_inferno +game_mode 1 +game_type 0 +sv_setsteamaccount "$STEAM_GAME_SERVER_TOKEN"
-EOF
+# Add Discord alerts
+echo "" | sudo tee -a "$LINUXGSM_COMMON_CFG"
+echo "discordalert=\"on\"" | tee -a "$LINUXGSM_COMMON_CFG"
+echo "discordwebhook=\"$DISCORD_WEBHOOK\"" | tee -a "$LINUXGSM_COMMON_CFG"
+
+# Start the CS2 server
+./cs2server start -dedicated -usercon -maxplayers 10 +game_mode 1 +game_type 0
