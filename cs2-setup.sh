@@ -1,5 +1,11 @@
 #!/bin/bash
 
+sudo dpkg --add-architecture i386
+ssudo apt updateudo apt update
+yes | sudo apt install binutils bsdmainutils bzip2 libsdl2-2.0-0:i386 pigz steamcmd unzip jq netcat lib32gcc-s1 lib32stdc++6
+sudo snap install aws-cli --classic
+sudo snap start amazon-ssm-agent
+
 AWS_REGION="us-east-1"
 STEAM_USER="cs2server"
 STEAM_USER_PW_JSON=$(aws secretsmanager get-secret-value --secret-id 'ec2-steam-user-pw' --region $AWS_REGION --query 'SecretString' --output text)
@@ -42,12 +48,8 @@ GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 METAMOD_URL="https://mms.alliedmods.net/mmsdrop/2.0/mmsource-2.0.0-git1314-linux.tar.gz"
 COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v281/counterstrikesharp-with-runtime-build-281-linux-71ae253.zip"
 
-sudo dpkg --add-architecture i386
-sudo apt update
-yes | sudo apt install binutils bsdmainutils bzip2 libsdl2-2.0-0:i386 pigz steamcmd unzip jq
-
 curl -Lo linuxgsm.sh https://linuxgsm.sh && chmod +x linuxgsm.sh && bash linuxgsm.sh cs2server
-yes | ./cs2server install
+./cs2server auto-install
 
 # Download the latest MetaMod build
 wget -q -O /tmp/metamod.tar.gz "$METAMOD_URL"
