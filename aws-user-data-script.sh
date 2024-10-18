@@ -28,11 +28,13 @@ CSGO_GAME_DIR="$CS2_DIR/game/csgo"
 CS2_SERVER_CFG="$CSGO_GAME_DIR/cfg/cs2server.cfg"
 LINUXGSM_COMMON_CFG="/home/cs2server/lgsm/config-lgsm/cs2server/common.cfg"
 GITHUB_MATCHZY_SERVER_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy-config.cfg"
+MATCH_TEMP_SERVER_FILE_PATH="/tmp/matchzy-server.cfg"
+GITHUB_MATCHZY_LIVE_OVERRIDE_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy_live_override.cfg"
+MATCHZY_TEMP_LIVE_OVERRIDE_FILE_PATH="/tmp/live_override.cfg"
 MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
 MATCHZY_ADMINS_FILE_PATH="$MATCHZY_DIR/admins.json"
 MATCHZY_CONFIG_FILE_PATH="$MATCHZY_DIR/config.cfg"
 MATCHZY_KNIFE_CONFIG_FILE_PATH="$MATCHZY_DIR/knife.cfg"
-MATCH_TEMP_SERVER_FILE_PATH="/tmp/matchzy-server.cfg"
 MATCHZY_VERSION="0.8.6"
 MATCHZY_URL="https://github.com/shobhit-pathak/MatchZy/releases/download/$MATCHZY_VERSION/MatchZy-$MATCHZY_VERSION.zip"
 EAGLE_STEAM_ID="76561197972259038"
@@ -105,14 +107,14 @@ sed -i "s/^mp_roundtime_hostage .*/mp_roundtime_hostage 1.15/" "$MATCHZY_KNIFE_C
 wget -q -O "$MATCH_TEMP_SERVER_FILE_PATH" "$GITHUB_MATCHZY_SERVER_CONFIG_URL"
 mv "$MATCH_TEMP_SERVER_FILE_PATH" "$MATCHZY_CONFIG_FILE_PATH"
 
-# I need to refactor this because you must have a unique GST per server
-STEAM_GAME_SERVER_TOKEN_JSON=$(aws secretsmanager get-secret-value --secret-id 'steam-game-server-token' --region $AWS_REGION --query 'SecretString' --output text)
-STEAM_GAME_SERVER_TOKEN=$(echo "$STEAM_GAME_SERVER_TOKEN_JSON" | jq -r '."steam-game-server-token"')
+# Add MatchZy live_override.cfg
+wget -q -O "$MATCHZY_TEMP_LIVE_OVERRIDE_FILE_PATH" "$GITHUB_MATCHZY_LIVE_OVERRIDE_CONFIG_URL"
+mv "$MATCHZY_TEMP_LIVE_OVERRIDE_FILE_PATH" "$MATCHZY_DIR"
+
 RCON_PASSWORD_JSON=$(aws secretsmanager get-secret-value --secret-id 'rcon-password' --region $AWS_REGION --query 'SecretString' --output text)
 RCON_PASSWORD=$(echo "$RCON_PASSWORD_JSON" | jq -r '."rcon-password"')
 
 # Replace existing configs
-sed -i "s/^sv_setsteamaccount.*/sv_setsteamaccount \"$STEAM_GAME_SERVER_TOKEN\"/" "$CS2_SERVER_CFG"
 sed -i "s/^map\b.*/map \"de_inferno\"/" "$CS2_SERVER_CFG"
 sed -i "s/^game_alias.*/game_alias \"competitive\"/" "$CS2_SERVER_CFG"
 
@@ -123,8 +125,6 @@ echo "tv_enable 1" | tee -a "$CS2_SERVER_CFG"
 echo "tv_advertise_watchable 1" | tee -a "$CS2_SERVER_CFG"
 echo "tv_delay 30" | tee -a "$CS2_SERVER_CFG"
 echo "tv_name \"GamingHerdVision\"" | tee -a "$CS2_SERVER_CFG"
-echo "mp_friendlyfire 0" | tee -a "$CS2_SERVER_CFG"
-echo "mp_round_restart_delay 8" | tee -a "$CS2_SERVER_CFG"
 
 CRON_JOBS="*/5 * * * * /home/cs2server/cs2server monitor > /dev/null 2>&1
 */30 * * * * /home/cs2server/cs2server update > /dev/null 2>&1
@@ -143,6 +143,3 @@ DISCORD_WEBHOOK=$(echo "$DISCORD_WEBHOOK_JSON" | jq -r '."discord-webhook"')
 echo "" | sudo tee -a "$LINUXGSM_COMMON_CFG"
 echo "discordalert=\"on\"" | tee -a "$LINUXGSM_COMMON_CFG"
 echo "discordwebhook=\"$DISCORD_WEBHOOK\"" | tee -a "$LINUXGSM_COMMON_CFG"
-
-# Start the CS2 server
-./cs2server start -dedicated -usercon -maxplayers 10 +game_mode 1 +game_type 0
