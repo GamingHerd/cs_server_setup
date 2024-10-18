@@ -31,13 +31,13 @@ else
   echo "$STEAM_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$STEAM_USER
 fi
 
-sudo -u $STEAM_USER -s
+sudo -u $STEAM_USER -i
 
 STEAM_USER="cs2server"
 
 cd /home/$STEAM_USER
 
-echo "Now acting as $STEAM_USER."
+echo "I am acting as $(whoami)"
 
 AWS_REGION="us-east-1"
 CS2_DIR="/home/cs2server/serverfiles"
