@@ -1,11 +1,12 @@
 #!/bin/bash
 
 SETUP_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/cs2-setup.sh"
+TEMP_FILE_PATH="/tmp/cs2-setup.sh"
 
-wget -q -O /tmp/cs2-setup.sh "$SETUP_URL"
+wget -q -O "$TEMP_FILE_PATH" "$SETUP_URL"
 
-chmod +x cs2-setup.sh
+chmod +x "$TEMP_FILE_PATH"
 
-./cs2-setup.sh
+. "$TEMP_FILE_PATH"
 
-rm -f /tmp/cs2-setup.sh
+rm -f "$TEMP_FILE_PATH"
