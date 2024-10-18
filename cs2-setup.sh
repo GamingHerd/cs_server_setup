@@ -1,5 +1,10 @@
 #!/bin/bash
 
+export DEBIAN_FRONTEND=noninteractive
+
+# Accept the SteamCMD license agreement automatically
+echo steam steam/question select "I AGREE" | sudo debconf-set-selections && echo steam steam/license note '' | sudo debconf-set-selections
+
 echo "Starting CS2 server setup script..."
 
 sudo dpkg --add-architecture i386
