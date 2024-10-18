@@ -31,8 +31,7 @@ else
   echo "$STEAM_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$STEAM_USER
 fi
 
-sudo -u $STEAM_USER -i
-
+sudo -u $STEAM_USER bash <<EOF
 STEAM_USER="cs2server"
 
 cd /home/$STEAM_USER
@@ -170,3 +169,4 @@ DISCORD_WEBHOOK=$(echo "$DISCORD_WEBHOOK_JSON" | jq -r '."discord-webhook"')
 echo "" | sudo tee -a "$LINUXGSM_COMMON_CFG"
 echo "discordalert=\"on\"" | tee -a "$LINUXGSM_COMMON_CFG"
 echo "discordwebhook=\"$DISCORD_WEBHOOK\"" | tee -a "$LINUXGSM_COMMON_CFG"
+EOF
