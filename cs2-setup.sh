@@ -1,10 +1,14 @@
 #!/bin/bash
 
+echo "Starting CS2 server setup script..."
+
 sudo dpkg --add-architecture i386
-ssudo apt updateudo apt update
+sudo apt update
 yes | sudo apt install binutils bsdmainutils bzip2 libsdl2-2.0-0:i386 pigz steamcmd unzip jq netcat lib32gcc-s1 lib32stdc++6
 sudo snap install aws-cli --classic
 sudo snap start amazon-ssm-agent
+
+echo "Finished installing dependencies."
 
 AWS_REGION="us-east-1"
 STEAM_USER="cs2server"
@@ -28,6 +32,8 @@ STEAM_USER="cs2server"
 
 cd /home/$STEAM_USER
 
+echo "Now acting as $STEAM_USER."
+
 AWS_REGION="us-east-1"
 CS2_DIR="/home/cs2server/serverfiles"
 CSGO_GAME_DIR="$CS2_DIR/game/csgo"
@@ -47,8 +53,14 @@ GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 METAMOD_URL="https://mms.alliedmods.net/mmsdrop/2.0/mmsource-2.0.0-git1314-linux.tar.gz"
 COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v281/counterstrikesharp-with-runtime-build-281-linux-71ae253.zip"
 
+echo "Starting install of linuxgsm."
+
 curl -Lo linuxgsm.sh https://linuxgsm.sh && chmod +x linuxgsm.sh && bash linuxgsm.sh cs2server
 ./cs2server auto-install
+
+echo "Completed install of linuxgsm."
+
+echo "Installing metamod."
 
 # Download the latest MetaMod build
 wget -q -O /tmp/metamod.tar.gz "$METAMOD_URL"
@@ -79,6 +91,10 @@ else
   echo "The file ${GAMEINFO_FILE_PATH} has been modified successfully. '$METAMOD_GAMEINFO_ENTRY' has been added."
 fi
 
+echo "Completed installing metamod."
+
+echo "Installing CounterStrikeSharp."
+
 # Download the latest CounterStrikeSharp build
 wget -q -O /tmp/cssharp.zip "$COUNTER_STRIKE_SHARP_URL"
 
@@ -87,6 +103,9 @@ unzip -qo /tmp/cssharp.zip -d "$CSGO_GAME_DIR"
 
 rm -f /tmp/cssharp.zip
 
+echo "Completed installing CounterStrikeSharp."
+
+echo "Installing MatchZy."
 # Download the latest MatchZy build
 wget -q -O /tmp/matchzy.zip "$MATCHZY_URL"
 
@@ -95,6 +114,7 @@ unzip -qo /tmp/matchzy.zip -d "$CSGO_GAME_DIR"
 
 # Remove the downloaded MatchZy .zip file
 rm -f /tmp/matchzy.zip
+echo "Completed installing MatchZy."
 
 # Replace MatchZy admins entry with proper admin
 sed -i "s/\"76561198154367261\": \".*\"/\"$EAGLE_STEAM_ID\": \"\"/" "$MATCHZY_ADMINS_FILE_PATH"
