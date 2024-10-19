@@ -144,14 +144,14 @@ CRON_JOBS="*/5 * * * * /home/cs2server/cs2server monitor > /dev/null 2>&1
 */30 * * * * /home/cs2server/cs2server update > /dev/null 2>&1
 0 0 * * 0 /home/cs2server/cs2server update-lgsm > /dev/null 2>&1"
 
-# Save current cron jobs to a temporary file
-crontab -l -u $STEAM_USER 2>/dev/null > /tmp/current_cronjobs
+crontab -l 2>/dev/null > /tmp/current_cronjobs
+echo "Save current cron jobs to a temporary file"
 
-# Add new cron jobs to the temporary file
 echo "$CRON_JOBS" >> /tmp/current_cronjobs
+echo "Added new cron jobs to the temporary file"
 
-# Install the updated cron jobs from the temporary file
-crontab -u $STEAM_USER /tmp/current_cronjobs
+crontab /tmp/current_cronjobs
+echo "Installed the updated cron jobs from the temporary file"
 
 # Clean up the temporary file
 rm /tmp/current_cronjobs
