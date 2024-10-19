@@ -36,9 +36,6 @@ GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 METAMOD_URL="https://mms.alliedmods.net/mmsdrop/2.0/mmsource-2.0.0-git1314-linux.tar.gz"
 METAMOD_GAMEINFO_ENTRY="                        Game    csgo/addons/metamod"
 COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v281/counterstrikesharp-with-runtime-build-281-linux-71ae253.zip"
-CRON_JOBS="*/5 * * * * /home/cs2server/cs2server monitor > /dev/null 2>&1
-*/30 * * * * /home/cs2server/cs2server update > /dev/null 2>&1
-0 0 * * 0 /home/cs2server/cs2server update-lgsm > /dev/null 2>&1"
 
 STEAM_USER_PW_JSON=$(aws secretsmanager get-secret-value --secret-id 'ec2-steam-user-pw' --region $AWS_REGION --query 'SecretString' --output text)
 STEAM_USER_PW=$(echo "$STEAM_USER_PW_JSON" | jq -r '."ec2-user-steam-pw"')
@@ -69,7 +66,7 @@ sudo -i -u $STEAM_USER env AWS_REGION="$AWS_REGION" CS2_DIR="$CS2_DIR" CSGO_GAME
   MATCHZY_URL="$MATCHZY_URL" EAGLE_STEAM_ID="$EAGLE_STEAM_ID" \
   GAMEINFO_FILE_PATH="$GAMEINFO_FILE_PATH" METAMOD_URL="$METAMOD_URL" \
   COUNTER_STRIKE_SHARP_URL="$COUNTER_STRIKE_SHARP_URL" METAMOD_GAMEINFO_ENTRY="$METAMOD_GAMEINFO_ENTRY" \
-  RCON_PASSWORD="$RCON_PASSWORD" CRON_JOBS="$CRON_JOBS" DISCORD_WEBHOOK="$DISCORD_WEBHOOK" bash <<'EOF'
+  RCON_PASSWORD="$RCON_PASSWORD" DISCORD_WEBHOOK="$DISCORD_WEBHOOK" bash <<'EOF'
 
 cd $CS2_DIR
 
@@ -143,11 +140,21 @@ echo "tv_name \"GamingHerdVision\"" | tee -a "$CS2_SERVER_CFG"
 echo "tv_maxclient 0" | tee -a "$CS2_SERVER_CFG"
 echo "tv_autorecord 1" | tee -a "$CS2_SERVER_CFG"
 
-# Add the cron jobs to the crontab for the cs2server user
-(
-  crontab -l -u $STEAM_USER 2>/dev/null
-  echo "$CRON_JOBS"
-) | crontab -u $STEAM_USER -
+CRON_JOBS="*/5 * * * * /home/cs2server/cs2server monitor > /dev/null 2>&1
+*/30 * * * * /home/cs2server/cs2server update > /dev/null 2>&1
+0 0 * * 0 /home/cs2server/cs2server update-lgsm > /dev/null 2>&1"
+
+# Save current cron jobs to a temporary file
+crontab -l -u $STEAM_USER 2>/dev/null > /tmp/current_cronjobs
+
+# Add new cron jobs to the temporary file
+echo "$CRON_JOBS" >> /tmp/current_cronjobs
+
+# Install the updated cron jobs from the temporary file
+crontab -u $STEAM_USER /tmp/current_cronjobs
+
+# Clean up the temporary file
+rm /tmp/current_cronjobs
 
 # Add Discord alerts
 echo "" | sudo tee -a "$LINUXGSM_COMMON_CFG"
