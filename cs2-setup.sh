@@ -160,4 +160,5 @@ rm /tmp/current_cronjobs
 echo "" | sudo tee -a "$LINUXGSM_COMMON_CFG"
 echo "discordalert=\"on\"" | tee -a "$LINUXGSM_COMMON_CFG"
 echo "discordwebhook=\"$DISCORD_WEBHOOK\"" | tee -a "$LINUXGSM_COMMON_CFG"
+echo 'startparameters="-dedicated -usercon -ip 0.0.0.0 -port 27015 -maxplayers 12 +game_type 0 +game_mode 1 +exec cs2server.cfg"' | sudo tee -a "$LINUXGSM_COMMON_CFG"
 EOF
