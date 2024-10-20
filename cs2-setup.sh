@@ -148,6 +148,8 @@ sudo -i -u $STEAM_USER env AWS_REGION="$AWS_REGION" \
   wget -q -O "$GSM_CS2_SERVER_OVERRIDE_FILE_PATH" "$GSM_CS2_SERVER_OVERRIDE_CONFIG_URL"
   mv "$GSM_CS2_SERVER_OVERRIDE_FILE_PATH" "$CS2_SERVER_CFG"
 
+  sed -i "s/^rcon_password\b.*/rcon_password \"$RCON_PASSWORD\"/" "$CS2_SERVER_CFG"
+
   # Set up cron jobs
   CRON_JOBS="*/5 * * * * /home/cs2server/cs2server monitor > /dev/null 2>&1
   */30 * * * * /home/cs2server/cs2server update > /dev/null 2>&1
