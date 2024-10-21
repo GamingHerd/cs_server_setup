@@ -168,7 +168,7 @@ echo "Cron jobs installed."
   echo ""
   echo "discordalert=\"on\""
   echo "discordwebhook=\"$DISCORD_WEBHOOK\""
-  echo 'startparameters="-dedicated -usercon -ip 0.0.0.0 -port 27015 -maxplayers 12 +game_type 0 +game_mode 1 +exec cs2server.cfg"'
+  echo 'startparameters="-dedicated -usercon -ip 0.0.0.0 -port 27015 -maxplayers 12 +game_type 0 +game_mode 1 +map de_inferno +exec cs2server.cfg"'
 } | sudo tee -a "$LINUXGSM_COMMON_CFG"
 
 
