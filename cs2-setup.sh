@@ -84,7 +84,7 @@ sudo -i -u $STEAM_USER env AWS_REGION="$AWS_REGION" \
   CS2_UPDATE_SCRIPT_URL="$CS2_UPDATE_SCRIPT_URL" \
   DISCORD_WEBHOOK="$DISCORD_WEBHOOK" bash <<'EOF'
 
-cd /home/$(whoami)
+cd /home/cs2server
 
 echo "I am acting as $(whoami)"
 
