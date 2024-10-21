@@ -39,7 +39,8 @@ EAGLE_STEAM_ID="76561197972259038"
 GAMEINFO_FILE_PATH="$CSGO_GAME_DIR/gameinfo.gi"
 METAMOD_URL="https://mms.alliedmods.net/mmsdrop/2.0/mmsource-2.0.0-git1314-linux.tar.gz"
 METAMOD_GAMEINFO_ENTRY="                        Game    csgo/addons/metamod"
-COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v281/counterstrikesharp-with-runtime-build-281-linux-71ae253.zip"
+COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v284/counterstrikesharp-with-runtime-build-284-linux-5c9d38b.zip"
+CS2_UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/cs2-update-shell-files-script.sh"
 
 # Fetch secret values from AWS Secrets Manager
 STEAM_USER_PW=$(aws secretsmanager get-secret-value --secret-id 'ec2-steam-user-pw' --region $AWS_REGION --query 'SecretString' --output text | jq -r '."ec2-user-steam-pw"')
@@ -80,9 +81,10 @@ sudo -i -u $STEAM_USER env AWS_REGION="$AWS_REGION" \
   COUNTER_STRIKE_SHARP_URL="$COUNTER_STRIKE_SHARP_URL" \
   METAMOD_GAMEINFO_ENTRY="$METAMOD_GAMEINFO_ENTRY" \
   RCON_PASSWORD="$RCON_PASSWORD" \
+  CS2_UPDATE_SCRIPT_URL="$CS2_UPDATE_SCRIPT_URL" \
   DISCORD_WEBHOOK="$DISCORD_WEBHOOK" bash <<'EOF'
 
-cd $CS2_DIR
+cd /home/$(whoami)
 
 echo "I am acting as $(whoami)"
 
@@ -169,4 +171,7 @@ echo "Cron jobs installed."
   echo 'startparameters="-dedicated -usercon -ip 0.0.0.0 -port 27015 -maxplayers 12 +game_type 0 +game_mode 1 +exec cs2server.cfg"'
 } | sudo tee -a "$LINUXGSM_COMMON_CFG"
 
+
+wget -q -O cs2-update-shell-files-script.sh "$CS2_UPDATE_SCRIPT_URL"
+chmod +x cs2-update-shell-files-script.sh
 EOF

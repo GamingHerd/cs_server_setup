@@ -3,7 +3,7 @@
 FULL_PACKAGE_UPDATE_SCRIPT_FILENAME="cs2-full-package-update-script.sh"
 GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
 
-cd /home/steam
+cd /home/cs2server
 
 wget -O "$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME" "$GITHUB_CS2_FULL_PACKAGE_UPDATE_SCRIPT_URL"
 chmod +x "$FULL_PACKAGE_UPDATE_SCRIPT_FILENAME"
