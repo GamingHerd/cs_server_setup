@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CS2_DIR="/home/$(whoami)/serverfiles"
+CS2_DIR="/home/cs2server/serverfiles"
 CSGO_GAME_DIR="$CS2_DIR/game/csgo"
 GITHUB_MATCHZY_SERVER_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy-config.cfg"
 MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
@@ -14,7 +14,7 @@ METAMOD_URL="https://mms.alliedmods.net/mmsdrop/2.0/mmsource-2.0.0-git1314-linux
 METAMOD_GAMEINFO_ENTRY="                        Game    csgo/addons/metamod"
 COUNTER_STRIKE_SHARP_URL="https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v284/counterstrikesharp-with-runtime-build-284-linux-5c9d38b.zip"
 
-cd /home/$(whoami)
+cd /home/cs2server
 
 sudo apt update && sudo apt upgrade -y && sudo apt full-upgrade -y && sudo apt autoremove -y && sudo apt clean
 
