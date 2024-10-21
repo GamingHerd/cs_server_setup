@@ -1,8 +1,12 @@
 #!/bin/bash
 
-CS2_DIR="/home/cs2server/serverfiles"
+STEAM_USER="cs2server"
+CS2_DIR="/home/$STEAM_USER/serverfiles"
 CSGO_GAME_DIR="$CS2_DIR/game/csgo"
 GITHUB_MATCHZY_SERVER_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy-config.cfg"
+MATCHZY_TEMP_SERVER_FILE_PATH="/tmp/matchzy-server.cfg"
+GITHUB_MATCHZY_LIVE_OVERRIDE_CONFIG_URL="https://raw.githubusercontent.com/GamingHerd/cs_server_setup/main/matchzy_live_override.cfg"
+MATCHZY_TEMP_LIVE_OVERRIDE_FILE_PATH="/tmp/live_override.cfg"
 MATCHZY_DIR="$CSGO_GAME_DIR/cfg/MatchZy"
 MATCHZY_ADMINS_FILE_PATH="$MATCHZY_DIR/admins.json"
 MATCHZY_CONFIG_FILE_PATH="$MATCHZY_DIR/config.cfg"
